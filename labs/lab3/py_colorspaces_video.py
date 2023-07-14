@@ -8,7 +8,7 @@ width = cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float
 # Get current height of frame
 height = cap.get(cv.CAP_PROP_FRAME_HEIGHT) # float
 # Define Video Frame Rate in fps
-fps = 30.0
+fps = cap.get(cv.CAP_PROP_FPS)
 
 # Define the codec and create VideoWriter object
 fourcc = cv.VideoWriter_fourcc(*'XVID')
@@ -22,36 +22,37 @@ while cap.isOpened():
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         break
-    # frame = cv.flip(frame, 0)
 
-    frame = cv.bilateralFilter(cv.flip(frame, 0),9,75,75) # blur
+    # Blur
+    frame = cv.bilateralFilter(frame,9,75,75)
     
+    # Color conversion
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    # define range of blue color in HSV (VSH)
-    # lower_blue = np.array([110,50,50])
-    # upper_blue = np.array([130,255,255])
+
+    # define range of colors in HSV (VSH)
     lower_blue = np.array([50,60,70])
     upper_blue = np.array([90,180,180])
+
     # Threshold the HSV image to get only blue colors
     mask = cv.inRange(hsv, lower_blue, upper_blue)
+
     # Bitwise-AND mask and original image
     res = cv.bitwise_and(frame,frame, mask= mask)
-    # cv.imshow('frame',frame)
-    # cv.imshow('mask',mask)
-    # cv.imshow('res',res)
 
     out1.write(frame)
     out2.write(mask)
     out3.write(res)
 
     cv.imshow('frame', frame)
-    cv.imshow('frame', mask)
-    cv.imshow('frame', res)
+    cv.imshow('mask', mask)
+    cv.imshow('res', res)
 
     if cv.waitKey(1) == ord('q'):
         break
 
 # Release everything if job is finished
 cap.release()
-out.release()
+out1.release()
+out2.release()
+out3.release()
 cv.destroyAllWindows()
